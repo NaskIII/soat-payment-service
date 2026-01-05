@@ -1,0 +1,21 @@
+services:
+  fastfood:
+    image: ${DOCKER_REGISTRY-}fastfood
+    hostname: fastfood
+    restart: always
+    networks:
+      api:
+        aliases:
+          - fastfood_api.local
+    build:
+      context: .
+      dockerfile: FastFood/Dockerfile
+    volumes:
+      - files:/home/api/files
+
+volumes:
+  files:
+    external: false
+
+networks:
+  api:

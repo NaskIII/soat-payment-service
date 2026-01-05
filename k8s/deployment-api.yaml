@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastfood-api
+  template:
+    metadata:
+      labels:
+        app: fastfood-api
+    spec:
+      imagePullSecrets:
+      - name: acr-secret
+      containers:
+      - name: fastfood-api
+        image: fastfoodsoatacr.azurecr.io/fastfood-api:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ConnectionStrings__DBConnectionString 
+          valueFrom:
+            secretKeyRef:
+              name: api-secret
+              key: DB_CONNECTION_STRING
+        - name: MercadoPago__AccessToken
+          valueFrom:
+            secretKeyRef:
+              name: api-secret
+              key: MP_ACCESS_TOKEN
+        - name: MercadoPago__WebhookUrl
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: MP_WEBHOOK_URL
