@@ -19,24 +19,8 @@ namespace Infraestructure.OrderGateway
             _configuration = configuration;
         }
 
-        public async Task UpdateOrderStatusAsync(Guid orderId, PaymentStatus payment)
+        public async Task UpdateOrderStatusAsync(Guid orderId, OrderStatus orderStatus)
         {
-            OrderStatus orderStatus = OrderStatus.Pending;
-
-            switch(payment)
-            {
-                case PaymentStatus.Pending:
-                    return;
-                case PaymentStatus.Completed:
-                    orderStatus = OrderStatus.Received;
-                    break;
-                case PaymentStatus.Failed:
-                case PaymentStatus.Refunded:
-                case PaymentStatus.Cancelled:
-                    orderStatus = OrderStatus.Canceled;
-                    break;
-            }
-
             var orderRequest = new
             {
                 OrderId = orderId,

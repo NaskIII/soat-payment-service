@@ -67,7 +67,7 @@ namespace Application.UseCases.PaymentUseCase
 
                     _logger.LogInformation("Payment {PaymentId} for Order {OrderId} was completed successfully.", payment.PaymentId, orderId);
 
-                    await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), PaymentStatus.Completed);
+                    await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), OrderStatus.Received);
                 }
                 catch (Exception ex)
                 {
@@ -80,7 +80,7 @@ namespace Application.UseCases.PaymentUseCase
                 payment.MarkAsFailed();
                 await _paymentRepository.UpdateAsync(payment);
 
-                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), PaymentStatus.Failed);
+                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), OrderStatus.Canceled);
 
                 _logger.LogWarning("Payment {PaymentId} for Order {OrderId} failed.", payment.PaymentId, payment.OrderId);
             }
@@ -89,7 +89,7 @@ namespace Application.UseCases.PaymentUseCase
                 payment.MarkAsFailed();
                 await _paymentRepository.UpdateAsync(payment);
 
-                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), PaymentStatus.Refunded);
+                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), OrderStatus.Canceled);
 
                 _logger.LogWarning("Payment {PaymentId} for Order {OrderId} refunded.", payment.PaymentId, payment.OrderId);
             }
@@ -98,7 +98,7 @@ namespace Application.UseCases.PaymentUseCase
                 payment.MarkAsCancelled();
                 await _paymentRepository.UpdateAsync(payment);
 
-                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), PaymentStatus.Cancelled);
+                await _updateOrderStatusGateway.UpdateOrderStatusAsync(new Guid(orderId), OrderStatus.Canceled);
 
                 _logger.LogWarning("Payment {PaymentId} for Order {OrderId} cancelled.", payment.PaymentId, payment.OrderId);
             }

@@ -5,21 +5,21 @@ namespace Domain.Enums
     public enum OrderStatus
     {
         [Description("Pendente")]
-        Pending,
+        Pending = 0,
 
         [Description("Recebido")]
-        Received,
+        Received = 1,
 
         [Description("Em preparação")]
-        InPreparation,
+        InPreparation = 2,
 
         [Description("Pronto")]
-        Ready,
+        Ready = 3,
 
         [Description("Finalizado")]
-        Completed,
+        Completed = 4,
 
         [Description("Cancelado")]
-        Canceled,
+        Canceled = 5,
     }
 }

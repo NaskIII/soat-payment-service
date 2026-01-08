@@ -5,6 +5,6 @@ namespace Application.Interfaces
     public interface IUpdateOrderStatusGateway
     {
 
-        public Task UpdateOrderStatusAsync(Guid orderId, PaymentStatus payment);
+        public Task UpdateOrderStatusAsync(Guid orderId, OrderStatus payment);
     }
 }
