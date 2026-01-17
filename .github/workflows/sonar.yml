@@ -27,7 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          dotnet-sonarscanner begin /k:"NaskIII_soat-kitchen-service" /o:"naskiii" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Infraestructure**,**FastFoodPaymentService**,**Program.cs**,**DependencyInjection.cs**,**Migrations**,**Dtos**"
+          dotnet-sonarscanner begin /k:"NaskIII_soat-payment-service" /o:"naskiii" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Infraestructure**,**FastFoodPaymentService**,**Program.cs**,**DependencyInjection.cs**,**Migrations**,**Dtos**"
           dotnet build .\FastFoodPaymentService.sln
           dotnet test .\FastFoodPaymentService.sln --settings coverlet.runsettings --results-directory TestResults
           dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
