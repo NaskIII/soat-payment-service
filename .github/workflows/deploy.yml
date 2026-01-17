@@ -1,28 +1,48 @@
-name: Build and Deploy API to AKS
+name: Build, Test and Deploy to AKS
 
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 env:
   AZURE_RESOURCE_GROUP: "fastfood-soat-rg"
-  AKS_CLUSTER_NAME:     "fastfood-soat-aks"
-  ACR_NAME:             "fastfoodsoatacr"
+  AKS_CLUSTER_NAME: "fastfood-soat-aks"
+  ACR_NAME: "fastfoodsoatacr"
+  SERVICE_NAME: "payment-api"
 
 jobs:
-  build-and-deploy:
+  build-test-quality:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: List files in the repository
-        run: ls -R
+      - name: Setup .NET
+        uses: azure/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
 
-      - name: Login to Azure
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Build and Sonar Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet-sonarscanner begin /k:"${{ env.SERVICE_NAME }}" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml"
+          dotnet build
+          dotnet test --collect:"XPlat Code Coverage" --DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+  deploy:
+    needs: build-test-quality
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -36,13 +56,12 @@ jobs:
       - name: ACR Login
         run: az acr login --name ${{ env.ACR_NAME }}
 
-      - name: Build and Push Docker image
+      - name: Build and Push Image
         run: |
-          docker build -f FastFood/Dockerfile -t ${{ env.ACR_NAME }}.azurecr.io/fastfood-api:${{ github.sha }} .
-          docker push ${{ env.ACR_NAME }}.azurecr.io/fastfood-api:${{ github.sha }}
-          
-      - name: Deploy to AKS
-        run: |
-          sed -i 's|image: .*|image: ${{ env.ACR_NAME }}.azurecr.io/fastfood-api:${{ github.sha }}|g' k8s/deployment-api.yaml
+          docker build -f Dockerfile -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+          docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
+      - name: Update K8s Manifests
+        run: |
+          sed -i 's|image: .*|image: ${{ env.ACR_NAME }}.azurecr.io/${{ env.SERVICE_NAME }}:${{ github.sha }}|g' k8s/deployment.yaml
           kubectl apply -f k8s/

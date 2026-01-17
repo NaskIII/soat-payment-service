@@ -12,22 +12,22 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["FastFood/FastFood.csproj", "FastFood/"]
+COPY ["FastFoodPaymentService/FastFoodPaymentService.csproj", "FastFoodPaymentService/"]
 COPY ["Application/Application.csproj", "Application/"]
 COPY ["Infraestructure/Infraestructure.csproj", "Infraestructure/"]
 COPY ["Domain/Domain.csproj", "Domain/"]
-RUN dotnet restore "./FastFood/FastFood.csproj"
+RUN dotnet restore "./FastFoodPaymentService/FastFoodPaymentService.csproj"
 COPY . .
-WORKDIR "/src/FastFood"
-RUN dotnet build "./FastFood.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/FastFoodPaymentService"
+RUN dotnet build "./FastFoodPaymentService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./FastFood.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./FastFoodPaymentService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "FastFood.dll"]
+ENTRYPOINT ["dotnet", "FastFoodPaymentService.dll"]
