@@ -104,11 +104,11 @@ namespace Application.Test
             await _useCase.ExecuteAsync(request);
 
             _paymentRepositoryMock.Verify(x => x.UpdateAsync(It.IsAny<Payment>()), Times.Never);
-            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(It.IsAny<Guid>(), It.IsAny<PaymentStatus>()), Times.Never);
+            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(It.IsAny<Guid>(), It.IsAny<OrderStatus>()), Times.Never);
         }
 
         [Fact]
-        public async Task ExecuteAsync_Should_Update_To_Completed_When_Status_Is_Verified_Completed()
+        public async Task ExecuteAsync_Should_Update_To_Received_When_Status_Is_Verified_Completed()
         {
             var externalId = "12345";
             var orderId = Guid.NewGuid();
@@ -127,7 +127,7 @@ namespace Application.Test
             existingPayment.PaymentStatus.Should().Be(PaymentStatus.Completed);
 
             _paymentRepositoryMock.Verify(x => x.UpdateAsync(existingPayment), Times.Once);
-            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, PaymentStatus.Completed), Times.Once);
+            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, OrderStatus.Received), Times.Once);
         }
 
         [Fact]
@@ -150,7 +150,7 @@ namespace Application.Test
             existingPayment.PaymentStatus.Should().Be(PaymentStatus.Failed);
 
             _paymentRepositoryMock.Verify(x => x.UpdateAsync(existingPayment), Times.Once);
-            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, PaymentStatus.Failed), Times.Once);
+            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, OrderStatus.Canceled), Times.Once);
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace Application.Test
 
             _paymentRepositoryMock.Verify(x => x.UpdateAsync(existingPayment), Times.Once);
 
-            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, PaymentStatus.Refunded), Times.Once);
+            _updateOrderStatusGatewayMock.Verify(x => x.UpdateOrderStatusAsync(orderId, OrderStatus.Canceled), Times.Once);
         }
 
         [Fact]

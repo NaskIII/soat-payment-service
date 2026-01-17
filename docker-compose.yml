@@ -1,15 +1,15 @@
 services:
-  fastfood:
-    image: ${DOCKER_REGISTRY-}fastfood
-    hostname: fastfood
+  fastfood-payment-service:
+    image: ${DOCKER_REGISTRY-}fastfood-payment-service
+    hostname: fastfood-payment-service
     restart: always
     networks:
       api:
         aliases:
-          - fastfood_api.local
+          - payment_service.local
     build:
       context: .
-      dockerfile: FastFood/Dockerfile
+      dockerfile: FastFoodPaymentService/Dockerfile
     volumes:
       - files:/home/api/files
 
